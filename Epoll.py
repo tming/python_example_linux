@@ -83,19 +83,19 @@ class Epoll_svr:
 			event_list = self._epoll.poll(self._time_out_secs)
 			for fd, event in event_list:
 				if event & select.EPOLLIN:
-					if self._handles[fd]:
+					if fd in self._handles.keys() and self._handles[fd]:
 						self._handles[fd].on_readable(fd)
 					else:
 						if self._logger:
 							self._logger.error("event obj not existed when %d readable!!!" %fd)
 				if event & select.EPOLLOUT:
-					if self._handles[fd]:
+					if fd in self._handles.keys() and self._handles[fd]:
 						self._handles[fd].on_writable(fd)
 					else:
 						if self._logger:
 							self._logger.error("event obj not existed when %d writable!!!" %fd)
 				if event & (select.EPOLLHUP|select.EPOLLERR):
-					if self._handles[fd]:
+					if fd in self._handles.keys() and self._handles[fd]:
 						self._handles[fd].on_error(fd)
 					else:
 						if self._logger:
@@ -122,7 +122,7 @@ class Test_session_handle_obj(Event_handle_obj):
 		self._data = b""
 		
 	def __del__(self):
-		Event_handle_obj.__del__(self, socket_obj)
+		Event_handle_obj.__del__(self)
 		
 	def on_readable(self, fd):
 		while True:
@@ -154,7 +154,7 @@ class Test_server_handle_obj(Event_handle_obj):
 		self._logger = logger
 		
 	def __del__(self):
-		Event_handle_obj.__del__(self, socket_obj)
+		Event_handle_obj.__del__(self)
 		
 	def on_readable(self, fd):
 		while True:
